@@ -33,6 +33,7 @@ class CategoryResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id'),
                 TextColumn::make('name'),
                 TextColumn::make('description')
                     ->limit(50),
