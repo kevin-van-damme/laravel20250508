@@ -16,6 +16,9 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Models\Category;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 
 class ProductResource extends Resource
 {
@@ -37,7 +40,9 @@ class ProductResource extends Resource
                     ->numeric(),
                 Forms\Components\FileUpload::make('image')
                     ->uploadButtonPosition('right'),
-                Forms\Components\Select::make('category')
+                Forms\Components\Select::make('category_id')
+                    ->label('Category')
+                    ->options(Category::all()->pluck('name', 'id'))
                     ->required(),
             ]);
     }
@@ -52,10 +57,23 @@ class ProductResource extends Resource
                 TextColumn::make('description')
                     ->limit(30),
                 TextColumn::make('price'),
-                TextColumn::make('category.name')
+                TextColumn::make('category.name')->label('Category'),
+                TextColumn::make('')
+                    ->searchable()
             ])
+
             ->filters([
-                //
+                SelectFilter::make('Categories')
+                    ->options([
+                        'All' => Category::all()->pluck('name', 'id')->toArray(),
+                    ]),
+                Filter::make('search')
+                    ->label('Search')
+                    ->query(
+                        fn(Builder $query, string $search) => $query
+                            ->where('name', 'like', "%{$search}%")
+                            ->orWhereHas('category', fn(Builder $query) => $query->where('name', 'like', "%{$search}%"))
+                    ),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
