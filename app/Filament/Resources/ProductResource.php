@@ -51,6 +51,7 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id'),
                 ImageColumn::make('image'),
                 TextColumn::make('name')
                     ->limit(20),
